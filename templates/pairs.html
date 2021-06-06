@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Social Keywords</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+    <link rel="stylesheet" href="/static/tagify.css">
+    <script type="module" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule="" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.1.1/tagify.min.js"></script>
+    <style>
+        html {
+            background-color: white;
+        }
+
+        ion-icon {
+            font-size: 20px;
+        }
+
+        .scrollable_div {
+            max-height: 67vh;
+            overflow: auto;
+            white-space: nowrap;
+        }
+
+        .yellow_box {
+            border: 3px solid #FFDB4A;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container is-fluid pl-6 pt-6">
+    <form method="post">
+        <div class="level-right">
+            <div class="level-item">
+                <div class="level-item">
+                    <div class="field">
+                        <label class="label">Search</label>
+                        <div class="control">
+                            <input class="tagify" style="height: 40px; width: 262px" type="text"
+                                   name='search'>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if found %}
+                <div class="level-item">
+                    <div class="field has-addons">
+                        <p class="control">
+                            <label class="label">&nbsp;</label>
+                            <button class="button is-warning" type="submit">
+                                <span class="pr-1">Search</span>
+                                <span class="icon">
+                                        <ion-icon name="search-outline"></ion-icon>
+                                    </span>
+                            </button>
+                        </p>
+                        <p class="control">
+                            <label class="label">&nbsp;</label>
+                            <button class="button" type="submit">
+                                <span class="pr-1">Сlear</span>
+                                <span class="icon">
+                                        <ion-icon name="close-outline"></ion-icon>
+                                    </span>
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="level-item">
+                    <div class="field">
+                        <label class="label">&nbsp;</label>
+                        <button class="button is-warning" type="submit">
+                            <span class="pr-1">Search</span>
+                            <span class="icon">
+                                <ion-icon name="search-outline"></ion-icon>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="level"></div>
+
+    {% if found %}
+        <div class="container is-fluid box scrollable_div">
+            <p class="title is-5">Found records:</p>
+            <ul>
+                {% for item in found %}
+                    <li class="block ml-5 p-3">
+                        <span class="yellow_box pl-6 pr-6 pt-2 pb-2 mr-5">{{ item['text'] }}</span>
+                        {% for keyword in item['keywords'] %}
+                            <span class="yellow_box p-2 mr-2">{{ keyword }}</span>
+                        {% endfor %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="container scrollable_div">
+            <p class="title is-5">All records:</p>
+            <ul>
+                {% for item in pairs %}
+                    <li class="block yellow_box ml-5 p-3">
+                        <span class="pt-2 pb-2"
+                              style="overflow: hidden; text-overflow:ellipsis; width:50%; display: inline-flex">
+                            {{ item['text'] }}
+                        </span>
+                        <span class="is-pulled-right" style="overflow: hidden; text-overflow:ellipsis;">
+                            {{ item['keywords'] | join(',  ') }}
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="level"></div>
+    <hr/>
+
+    <div class="container">
+        <form method="post">
+            <div class="columns ml-5">
+                <div class="column">
+                    <div class="field">
+                        <label class="label">Keywords</label>
+                        <div class="control">
+                            <input class="tagify" style="height: 40px; width: 262px" type="text"
+                                   name='keywords'>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Data</label>
+                        <div class="control has-icons-left">
+                            <input name="text" class="input is-warning" type="text" placeholder="Type something..">
+                            <span class="icon is-small is-left">
+                                <ion-icon name="text-outline"></ion-icon>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="field">
+                        <label class="label">&nbsp;</label>
+                        <button class="button is-warning" type="submit">
+                            <span class="pr-1">Add</span>
+                            <span class="icon">
+                                <ion-icon name="save-outline"></ion-icon>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+<script>
+    let url = 'api/keywords';
+    let keywords = [];
+
+    fetch(url)
+        .then(res => res.json())
+        .then((out) => {
+            out.forEach(function (item) {
+                keywords.push(item);
+            })
+
+            var input = document.querySelector('input[name="keywords"]')
+            // init Tagify script on the above inputs
+            tagify = new Tagify(input, {
+                whitelist: keywords,
+                maxTags: 12,
+                dropdown: {
+                    maxItems: 10,           // <- mixumum allowed rendered suggestions
+                    classname: "tags-look", // <- custom classname for this dropdown, so it could be targeted
+                    enabled: 0,             // <- show suggestions on focus
+                    closeOnSelect: true    // <- do not hide the suggestions dropdown once an item has been selected
+                }
+            })
+
+            var search = document.querySelector('input[name="search"]')
+            // init Tagify script on the above inputs
+            tagify = new Tagify(search, {
+                whitelist: keywords,
+                maxTags: 12,
+                dropdown: {
+                    maxItems: 10,           // <- mixumum allowed rendered suggestions
+                    classname: "tags-look", // <- custom classname for this dropdown, so it could be targeted
+                    enabled: 0,             // <- show suggestions on focus
+                    closeOnSelect: true    // <- do not hide the suggestions dropdown once an item has been selected
+                }
+            })
+        })
+        .catch(err => {
+            throw err
+        });
+    console.log(keywords)
+</script>
+</body>
+</html>
