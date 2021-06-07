@@ -32,7 +32,7 @@
     </style>
 </head>
 <body>
-<div class="container is-fluid pl-6 pt-6">
+<div class="container is-fluid pt-6">
     <form method="post">
         <div class="level-right">
             <div class="level-item">
@@ -107,12 +107,12 @@
             <p class="title is-5">All records:</p>
             <ul>
                 {% for item in pairs %}
-                    <li class="block yellow_box ml-5 p-3">
+                    <li class="block yellow_box p-3">
                         <span class="pt-2 pb-2"
-                              style="overflow: hidden; text-overflow:ellipsis; width:50%; display: inline-flex">
+                              style="overflow: hidden; text-overflow:ellipsis; white-space: nowrap; width:60%; display: inline-block;">
                             {{ item['text'] }}
                         </span>
-                        <span class="is-pulled-right" style="overflow: hidden; text-overflow:ellipsis;">
+                        <span style="overflow: hidden; text-overflow:ellipsis; white-space: nowrap; width:30%; display: block; float: right !important;">
                             {{ item['keywords'] | join(',  ') }}
                         </span>
                     </li>
